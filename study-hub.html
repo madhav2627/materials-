@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyVault — Subject Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e11;
+    --surface: #13151a;
+    --card: #181b22;
+    --border: #252832;
+    --accent: #f0c040;
+    --accent2: #5b8fff;
+    --text: #e8e9ef;
+    --muted: #6b6f7e;
+    --danger: #ff5a5a;
+    --success: #4ecb71;
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(91,143,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(240,192,64,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,14,17,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    background: var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN ── */
+  .main { position: relative; z-index: 1; }
+
+  /* ── HOME PAGE ── */
+  #home-page { display: block; }
+
+  .hero {
+    padding: 64px 40px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+
+  /* ── CREATE CARD BTN ── */
+  .btn-create {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #0d0e11;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 13px 28px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 4px 24px rgba(240,192,64,0.25);
+  }
+
+  .btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(240,192,64,0.38);
+  }
+
+  .btn-create svg { width: 18px; height: 18px; }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: var(--border);
+    padding: 3px 9px;
+    border-radius: 100px;
+  }
+
+  /* ── CARD GRID ── */
+  .cards-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  /* Subject card */
+  .subject-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px 22px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .subject-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-color, var(--accent2));
+    border-radius: var(--radius) var(--radius) 0 0;
+    transition: height 0.2s;
+  }
+
+  .subject-card:hover {
+    border-color: var(--card-color, var(--accent2));
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  }
+
+  .subject-card:hover::before { height: 5px; }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .card-abbr {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .card-name {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-files {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .card-arrow {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .subject-card:hover .card-arrow {
+    background: var(--card-color, var(--accent2));
+    transform: translateX(3px);
+  }
+
+  .card-arrow svg { width: 13px; height: 13px; }
+
+  /* Delete button on card */
+  .card-del {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    color: var(--muted);
+  }
+
+  .subject-card:hover .card-del { opacity: 1; }
+  .card-del:hover { background: rgba(255,90,90,0.15); color: var(--danger); }
+  .card-del svg { width: 13px; height: 13px; }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1/-1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* ── SUBJECT PAGE ── */
+  #subject-page { display: none; }
+
+  .page-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 28px 40px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--border);
+    border: none;
+    color: var(--muted);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .btn-back:hover { background: var(--surface); color: var(--text); }
+
+  .breadcrumb {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .breadcrumb span { color: var(--text); }
+
+  .subject-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 40px 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .subject-header-left {}
+
+  .subject-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .subject-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+  }
+
+  .subject-meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+
+  .btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 11px 22px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-upload:hover { border-color: var(--accent); background: rgba(240,192,64,0.06); }
+
+  /* Files grid */
+  .files-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 40px 80px;
+  }
+
+  .files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .file-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeUp 0.3s ease both;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .file-card:hover { border-color: #353848; transform: translateY(-2px); }
+
+  .file-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+  }
+
+  .file-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .file-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .file-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .btn-file-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-family: 'Instrument Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .btn-file-action:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(91,143,255,0.06); }
+
+  .btn-file-delete:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,90,90,0.06); }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 60px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(240,192,64,0.04);
+  }
+
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .drop-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .drop-text { font-size: 0.9rem; color: var(--muted); }
+  .drop-text strong { color: var(--text); }
+  .drop-hint { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+
+  /* No files empty */
+  .no-files {
+    text-align: center;
+    color: var(--muted);
+    padding: 60px;
+    grid-column: 1/-1;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+
+  .no-files-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.4; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 36px;
+    width: 100%;
+    max-width: 480px;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.22s;
+    position: relative;
+  }
+
+  .modal-overlay.open .modal { transform: none; }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 18px; right: 18px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .modal-close:hover { background: var(--surface); color: var(--text); }
+
+  .form-group { margin-bottom: 20px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.95rem;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+  .form-input::placeholder { color: var(--muted); }
+
+  /* Color picker */
+  .color-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.active { border-color: white; transform: scale(1.1); }
+
+  /* Emoji picker */
+  .emoji-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .emoji-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .emoji-btn:hover, .emoji-btn.active {
+    background: var(--border);
+    border-color: var(--accent);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.88rem;
+    padding: 10px 20px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-submit {
+    background: var(--accent);
+    border: none;
+    color: #0d0e11;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(240,192,64,0.3); }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 600px) {
+    header { padding: 0 20px; }
+    .hero, .cards-section, .page-nav, .subject-header, .files-section { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Study<span>Vault</span></div>
+  <div class="header-right">
+    <span class="badge" id="header-badge">Home</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ══ HOME PAGE ══ -->
+  <div id="home-page">
+    <div class="hero">
+      <div class="hero-label">📚 Your Academic Hub</div>
+      <h1>All your subjects,<br><em>one place.</em></h1>
+      <p class="hero-sub">Store, organise, and access all your study materials by subject. Click a card to open it, or create a new one.</p>
+      <button class="btn-create" onclick="openCreateModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Subject Card
+      </button>
+    </div>
+
+    <div class="cards-section">
+      <div class="section-header">
+        <div class="section-title">Your Subjects</div>
+        <span class="section-count" id="subject-count">0</span>
+      </div>
+      <div class="cards-grid" id="cards-grid">
+        <!-- cards injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SUBJECT PAGE ══ -->
+  <div id="subject-page">
+    <div class="page-nav">
+      <button class="btn-back" onclick="goHome()">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <span class="breadcrumb">Subjects / <span id="breadcrumb-name"></span></span>
+    </div>
+
+    <div class="subject-header">
+      <div class="subject-header-left">
+        <div class="subject-tag" id="subject-tag"></div>
+        <h2 class="subject-title" id="subject-title"></h2>
+        <p class="subject-meta" id="subject-meta"></p>
+      </div>
+      <button class="btn-upload" onclick="triggerUpload()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        Upload Material
+      </button>
+    </div>
+
+    <div class="files-section">
+      <div class="section-header">
+        <div class="section-title">Materials</div>
+        <span class="section-count" id="file-count">0</span>
+      </div>
+
+      <!-- drop zone -->
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" multiple accept="*/*" onchange="handleFileSelect(event)">
+        <div class="drop-icon">⬆️</div>
+        <div class="drop-text"><strong>Drop files here</strong> or click to browse</div>
+        <div class="drop-hint">PDFs, Docs, Images, Videos — anything</div>
+      </div>
+
+      <div class="files-grid" id="files-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ CREATE MODAL ══ -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeCreateModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-title">New Subject Card</div>
+
+    <div class="form-group">
+      <label class="form-label">Abbreviation (e.g. SNA)</label>
+      <input class="form-input" id="input-abbr" maxlength="6" placeholder="SNA" oninput="this.value = this.value.toUpperCase()">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Full Subject Name</label>
+      <input class="form-input" id="input-name" placeholder="Social Network Analysis">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Pick a Color</label>
+      <div class="color-grid" id="color-grid"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Icon</label>
+      <div class="emoji-grid" id="emoji-grid"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn-submit" onclick="createCard()">Create Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let subjects = JSON.parse(localStorage.getItem('sv_subjects') || '[]');
+let files = JSON.parse(localStorage.getItem('sv_files') || '{}'); // {id: [{name, size, type, dataUrl, added}]}
+let currentSubjectId = null;
+let selectedColor = '#5b8fff';
+let selectedEmoji = '📘';
+
+const COLORS = ['#5b8fff','#f0c040','#4ecb71','#ff5a5a','#b57bf0','#ff8c42','#00c9b1','#ff6fb0','#a0c4ff','#e2f66e'];
+const EMOJIS = ['📘','📗','📕','📙','📓','🔬','💻','🧮','🎯','📊','🧠','🗺️','⚗️','🛠️','🎓'];
+
+// ── INIT ──
+function init() {
+  renderColorGrid();
+  renderEmojiGrid();
+  renderCards();
+  setupDrop();
+
+  // Default cards if empty
+  if (subjects.length === 0) {
+    subjects = [
+      { id: uid(), abbr: 'SNA', name: 'Social Network Analysis', color: '#5b8fff', emoji: '🗺️', created: Date.now() },
+      { id: uid(), abbr: 'ML',  name: 'Machine Learning',        color: '#4ecb71', emoji: '🧠', created: Date.now() },
+      { id: uid(), abbr: 'OS',  name: 'Operating Systems',        color: '#ff5a5a', emoji: '💻', created: Date.now() },
+    ];
+    save();
+    renderCards();
+  }
+}
+
+function uid() { return Math.random().toString(36).slice(2, 9); }
+
+function save() {
+  localStorage.setItem('sv_subjects', JSON.stringify(subjects));
+  localStorage.setItem('sv_files', JSON.stringify(files));
+}
+
+// ── RENDER CARDS ──
+function renderCards() {
+  const grid = document.getElementById('cards-grid');
+  document.getElementById('subject-count').textContent = subjects.length;
+
+  if (subjects.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No subjects yet. Create your first card!</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = subjects.map((s, i) => {
+    const fCount = (files[s.id] || []).length;
+    return `
+    <div class="subject-card" style="--card-color:${s.color}; animation-delay:${i*0.06}s"
+         onclick="openSubject('${s.id}')">
+      <button class="card-del" onclick="event.stopPropagation(); deleteSubject('${s.id}')" title="Delete">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="card-icon" style="background:${s.color}22">${s.emoji}</div>
+      <div class="card-abbr">${s.abbr}</div>
+      <div class="card-name">${s.name}</div>
+      <div class="card-footer">
+        <span class="card-files">${fCount} file${fCount !== 1 ? 's' : ''}</span>
+        <div class="card-arrow" style="--hover-bg:${s.color}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── OPEN SUBJECT ──
+function openSubject(id) {
+  currentSubjectId = id;
+  const s = subjects.find(x => x.id === id);
+  document.getElementById('home-page').style.display = 'none';
+  document.getElementById('subject-page').style.display = 'block';
+  document.getElementById('breadcrumb-name').textContent = s.abbr;
+  document.getElementById('subject-tag').textContent = '📌 ' + s.abbr;
+  document.getElementById('subject-title').textContent = s.name;
+  document.getElementById('header-badge').textContent = s.abbr;
+  const fc = (files[id] || []).length;
+  document.getElementById('subject-meta').textContent = `${fc} material${fc !== 1 ? 's' : ''} uploaded`;
+
+  renderFiles(id);
+}
+
+function goHome() {
+  document.getElementById('home-page').style.display = 'block';
+  document.getElementById('subject-page').style.display = 'none';
+  document.getElementById('header-badge').textContent = 'Home';
+  currentSubjectId = null;
+  renderCards();
+}
+
+// ── RENDER FILES ──
+function renderFiles(id) {
+  const list = files[id] || [];
+  const grid = document.getElementById('files-grid');
+  document.getElementById('file-count').textContent = list.length;
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="no-files"><div class="no-files-icon">📂</div><p>No materials yet. Drop files above or click Upload.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((f, i) => {
+    const { bg, icon } = fileStyle(f.type);
+    return `
+    <div class="file-card" style="animation-delay:${i*0.05}s">
+      <div class="file-icon-wrap" style="background:${bg}">${icon}</div>
+      <div class="file-name">${f.name}</div>
+      <div class="file-meta">${f.size} · ${f.added}</div>
+      <div class="file-actions">
+        <button class="btn-file-action" onclick="downloadFile('${id}', ${i})" title="Download">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          Download
+        </button>
+        <button class="btn-file-action btn-file-delete" onclick="deleteFile('${id}', ${i})" title="Remove">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Remove
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fileStyle(type) {
+  if (!type) return { bg: '#252832', icon: '📄' };
+  if (type.includes('pdf'))   return { bg: 'rgba(255,90,90,0.12)', icon: '📕' };
+  if (type.includes('image')) return { bg: 'rgba(78,203,113,0.12)', icon: '🖼️' };
+  if (type.includes('video')) return { bg: 'rgba(91,143,255,0.12)', icon: '🎬' };
+  if (type.includes('audio')) return { bg: 'rgba(176,113,255,0.12)', icon: '🎵' };
+  if (type.includes('word') || type.includes('document')) return { bg: 'rgba(91,143,255,0.12)', icon: '📝' };
+  if (type.includes('sheet') || type.includes('excel'))   return { bg: 'rgba(78,203,113,0.12)', icon: '📊' };
+  if (type.includes('presentation') || type.includes('powerpoint')) return { bg: 'rgba(255,140,66,0.12)', icon: '📽️' };
+  if (type.includes('zip') || type.includes('rar')) return { bg: 'rgba(160,196,255,0.12)', icon: '🗜️' };
+  if (type.includes('text') || type.includes('plain')) return { bg: 'rgba(240,192,64,0.12)', icon: '📃' };
+  return { bg: '#252832', icon: '📄' };
+}
+
+// ── UPLOAD ──
+function triggerUpload() {
+  document.getElementById('file-input').click();
+}
+
+function handleFileSelect(e) {
+  const fileList = e.target.files;
+  if (!fileList || !currentSubjectId) return;
+  Array.from(fileList).forEach(f => addFile(f));
+}
+
+function addFile(f) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (!files[currentSubjectId]) files[currentSubjectId] = [];
+    files[currentSubjectId].push({
+      name: f.name,
+      size: formatSize(f.size),
+      type: f.type,
+      dataUrl: e.target.result,
+      added: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    });
+    save();
+    renderFiles(currentSubjectId);
+    // Update meta
+    const fc = files[currentSubjectId].length;
+    document.getElementById('subject-meta').textContent = `${fc} material${fc !== 1 ? 's' : ''} uploaded`;
+    showToast('✅ ' + f.name + ' added');
+  };
+  reader.readAsDataURL(f);
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+function downloadFile(subjectId, idx) {
+  const f = (files[subjectId] || [])[idx];
+  if (!f) return;
+  const a = document.createElement('a');
+  a.href = f.dataUrl;
+  a.download = f.name;
+  a.click();
+}
+
+function deleteFile(subjectId, idx) {
+  if (!confirm('Remove this file?')) return;
+  files[subjectId].splice(idx, 1);
+  save();
+  renderFiles(subjectId);
+  showToast('🗑️ File removed');
+}
+
+// ── DRAG & DROP ──
+function setupDrop() {
+  const zone = document.getElementById('drop-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    Array.from(e.dataTransfer.files).forEach(f => addFile(f));
+  });
+}
+
+// ── CREATE CARD ──
+function openCreateModal() {
+  selectedColor = COLORS[0];
+  selectedEmoji = EMOJIS[0];
+  document.getElementById('input-abbr').value = '';
+  document.getElementById('input-name').value = '';
+  renderColorGrid();
+  renderEmojiGrid();
+  document.getElementById('create-modal').classList.add('open');
+  setTimeout(() => document.getElementById('input-abbr').focus(), 200);
+}
+
+function closeCreateModal() {
+  document.getElementById('create-modal').classList.remove('open');
+}
+
+function createCard() {
+  const abbr = document.getElementById('input-abbr').value.trim().toUpperCase();
+  const name = document.getElementById('input-name').value.trim();
+  if (!abbr) { showToast('⚠️ Enter an abbreviation'); return; }
+  if (!name) { showToast('⚠️ Enter the subject name'); return; }
+
+  subjects.push({ id: uid(), abbr, name, color: selectedColor, emoji: selectedEmoji, created: Date.now() });
+  save();
+  renderCards();
+  closeCreateModal();
+  showToast('🎉 ' + abbr + ' created!');
+}
+
+function deleteSubject(id) {
+  if (!confirm('Delete this subject card and all its files?')) return;
+  subjects = subjects.filter(s => s.id !== id);
+  delete files[id];
+  save();
+  renderCards();
+  showToast('🗑️ Subject deleted');
+}
+
+// ── COLOR + EMOJI ──
+function renderColorGrid() {
+  document.getElementById('color-grid').innerHTML = COLORS.map(c =>
+    `<div class="color-swatch ${c === selectedColor ? 'active' : ''}"
+          style="background:${c}" onclick="pickColor('${c}')"></div>`
+  ).join('');
+}
+
+function renderEmojiGrid() {
+  document.getElementById('emoji-grid').innerHTML = EMOJIS.map(e =>
+    `<button class="emoji-btn ${e === selectedEmoji ? 'active' : ''}"
+             onclick="pickEmoji('${e}')">${e}</button>`
+  ).join('');
+}
+
+function pickColor(c) { selectedColor = c; renderColorGrid(); }
+function pickEmoji(e) { selectedEmoji = e; renderEmojiGrid(); }
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeCreateModal();
+  if (e.key === 'Enter' && document.getElementById('create-modal').classList.contains('open')) createCard();
+});
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
